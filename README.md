@@ -24,3 +24,5 @@ Then every impression that hits it will increment a counter to show information.
 
 ## Future enhancements
 Using a kind of persistent storage could allow long running statistical tallies. 
+
+Also might be useful to have a 'clear count' button and a button to download the data as CSV
