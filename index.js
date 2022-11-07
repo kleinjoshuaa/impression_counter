@@ -10,7 +10,7 @@ const port = 3000
 
 function epochToHuman(ms) {
     let myDate = new Date(parseInt(ms, 10));
-    let dateStr = myDate.getFullYear() + "/" + (myDate.getMonth() + 1) + "/" + myDate.getDate() + " " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds() + " UTC"
+    let dateStr = myDate.getFullYear() + "-" + (myDate.getMonth() + 1) + "-" + myDate.getDate() + " " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds() + " UTC"
     return dateStr
 }
 
@@ -41,7 +41,7 @@ function StatTotaller() {
         if (!(env in impressions[splitName])) {
             impressions[splitName][env] = {}
         }
-        if(treatment in impressions[splitName][env]) {
+        if(!(treatment in impressions[splitName][env])) {
             impressions[splitName][env][treatment] = {count: 0, distinctKeyList: [], mostRecent: 0}
         }
         impressions[splitName][env][treatment].count += 1;
@@ -66,20 +66,18 @@ function StatTotaller() {
     this.buildImpressionsHTML = function() {
         let listOfSplits = listSplits();
         let htmlString = ''
-        if(listOfSplits.length == 0) {
-   //         htmlString += `<tableclass='styled-table'><thead><tr><thscope="col">No Split Data!</th></tr></thead></table>`
-        } else {
+        if(listOfSplits.length != 0) {
             for(let splitIdx = 0; splitIdx < listOfSplits.length; splitIdx += 1) {
                 let splitName = listOfSplits[splitIdx]
                 let splitData = getSplit(splitName)
                 htmlString += `<table border="1" cellpadding="10" cellspacing="1" class='styled-table'><thead><tr><th colspan="3" scope="col">${splitName}</th></tr></thead><tbody>`
-                for (let envIdx = 0; envIdx < Object.keys(splitData); envIdx += 1) {
+                for (let envIdx = 0; envIdx < Object.keys(splitData).length; envIdx += 1) {
                     let environmentName = Object.keys(splitData)[envIdx];
                     let environment = splitData[environmentName];
                     for (let treatmentIdx = 0; treatmentIdx < Object.keys(environment).length; treatmentIdx += 1) {
                         let treatmentName = Object.keys(environment)[treatmentIdx];
                         let treatment = environment[treatmentName];
-                        htmlString += `<tr><td>${environmentName}</td><td>${treatmentName}</td><td><ul><li>ImpressionsCount: ${treatment.count} </li><li>distinctKeyCount: ${treatment.distinctKeyList.length} </li><li>mostRecentHit: ${epochToHuman(treatment.time)} </li></ul></td></tr>`
+                        htmlString += `<tr><td>${environmentName}</td><td>${treatmentName}</td><td><ul><li>ImpressionsCount: ${treatment.count} </li><li>distinctKeyCount: ${treatment.distinctKeyList.length} </li><li>mostRecentHit: ${epochToHuman(treatment.mostRecent)} </li></ul></td></tr>`
                     }
                 }
                 htmlString += `</tbody></table>`
@@ -94,7 +92,9 @@ let totals = new StatTotaller();
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.raw());
 app.use(express.static(path.join(__dirname, "public")));
 
 
@@ -126,9 +126,7 @@ app.get("/impressionsStream", (req, res) => {
 app.post("/impression", function (req, res) {
     const impressions = req.body;
     for (let index = 0; index < impressions.length; index++) {
-        console.log('adding impressions to total')
         totals.addImpression(impressions[index]);
-        
     }
     res.sendStatus(200);
   });
