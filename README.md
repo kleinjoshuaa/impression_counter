@@ -16,7 +16,7 @@ node index.js
 ```
 It will serve locally on port 3000
 
-You will need to set up your split webhook to point to your server. Ensure that it's hitting the `/impression` endpoint. 
+You will need to set up your split impressions webhook to point to your server. Ensure that it's hitting the `/impression` endpoint. 
 
 Then every impression that hits it will increment a counter to show information. 
 
