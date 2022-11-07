@@ -21,3 +21,6 @@ You will need to set up your split impressions webhook to point to your server. 
 Then every impression that hits it will increment a counter to show information. 
 
 ![dashboard](https://user-images.githubusercontent.com/1207274/200390756-a4e81802-2db5-4bec-b829-1bfab87805bf.gif)
+
+## Future enhancements
+Using a kind of persistent storage could allow long running statistical tallies. 
